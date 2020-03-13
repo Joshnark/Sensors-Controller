@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">OrientationTest</string>
+
+    <!-- service -->
+
+    <string name="location_notification_channel_id">1001</string>
+    <string name="location_notification_channel_name">Localización cafachiva</string>
+</resources>
