@@ -1,4 +1,4 @@
-package com.testing.background.models
+package com.testing.models
 
 import android.location.Location
 

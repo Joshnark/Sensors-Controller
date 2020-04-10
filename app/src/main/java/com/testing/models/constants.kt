@@ -1,4 +1,4 @@
-package com.testing.background.models
+package com.testing.models
 
 const val LOCATION_NOTIFICATION_ID = 1001
 const val LOCATION_NOTIFICATION_TITLE = "Recorrido en curso"

@@ -7,12 +7,13 @@ import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.testing.background.controllers.LocationController
-import com.testing.background.controllers.SensorController
-import com.testing.background.models.CustomLocationCallback
-import com.testing.background.models.CustomSensorCallback
+import com.testing.controllers.LocationController
+import com.testing.controllers.SensorController
+import com.testing.models.CustomLocationCallback
+import com.testing.models.CustomSensorCallback
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), CustomLocationCallback, CustomSensorCallback {
@@ -20,70 +21,69 @@ class MainActivity : AppCompatActivity(), CustomLocationCallback, CustomSensorCa
     private lateinit var locationController: LocationController
     private lateinit var sensorController: SensorController
 
+    private var orientation: Float? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         locationController = LocationController(this)
         sensorController = SensorController(this)
 
-
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M){
-            if(!(checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)){
-                ActivityCompat.requestPermissions(this,
-                    arrayOf(ACCESS_FINE_LOCATION), 42)
-            }
+        if(hasPermission()){
+            startSensorUpdates()
+        }
+        else{
+            requestPermission()
         }
     }
 
-    override fun onResume(){
-        super.onResume()
-        setLocationUpdates()
+    override fun onDestroy() {
+        super.onDestroy()
+        removeSensorUpdates()
     }
 
-    override fun onPause() {
-        super.onPause()
-        removeLocationUpdates()
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(hasPermission()){
+            startSensorUpdates()
+        }
+        else{
+            Toast.makeText(this, getString(R.string.needs_permissions), Toast.LENGTH_LONG).show()
+            requestPermission()
+        }
     }
 
-    private fun setLocationUpdates(){
+    override fun onLocationReceived(location: Location) {
+        Log.e(this::class.java.name, "long: ${location.longitude} - lat: ${location.latitude}")
+    }
+
+    override fun onOrientationChanged(radians: Float) {
+        orientation = radians
+        setCompass(radians)
+    }
+
+    private fun requestPermission() = ActivityCompat.requestPermissions(this,
+        arrayOf(ACCESS_FINE_LOCATION), 42)
+
+    private fun hasPermission(): Boolean {
+        return Build.VERSION.SDK_INT <= Build.VERSION_CODES.M ||
+                checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun startSensorUpdates() {
         locationController.requestLocationUpdates(this)
         sensorController.registerListeners(this, Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_MAGNETIC_FIELD)
     }
 
-    private fun removeLocationUpdates() {
+    private fun removeSensorUpdates() {
         locationController.removeLocationUpdates()
         sensorController.unRegisterListeners()
     }
 
-    var orientation: Float? = null
-
-    private fun log(vararg text: Any){
-
-        var source = String()
-
-        text.forEach {
-            Log.d(this::class.java.name, it.toString())
-            source += " $it"
-        }
-
-        logText.text = source
-    }
-
     private fun setCompass(orientation: Float){
-        val degrees: Double = (Math.toDegrees( orientation.toDouble() ) + 360 ) % 360
-        compass.rotation = degrees.toFloat()
-        Log.e(this::class.java.name, degrees.toString())
-    }
-
-    override fun onLocationReceived(location: Location) {
-        this.log(location.longitude, location.latitude)
-
-    }
-
-    override fun onOrientationChanged(radians: Float) {
-        super.onOrientationChanged(radians)
-        orientation = radians
-        setCompass(radians)
+        compass.rotation = orientation
+        Log.e(this::class.java.name, orientation.toString())
     }
 
 }

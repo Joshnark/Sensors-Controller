@@ -1,11 +1,11 @@
-package com.testing.background.controllers
+package com.testing.controllers
 
 import android.content.Context
 import android.os.Looper
 import android.util.Log
-import com.testing.background.models.FASTEST_INTERVAL
-import com.testing.background.models.CustomLocationCallback
-import com.testing.background.models.UPDATE_INTERVAL
+import com.testing.models.FASTEST_INTERVAL
+import com.testing.models.CustomLocationCallback
+import com.testing.models.UPDATE_INTERVAL
 import com.google.android.gms.location.*
 
 class LocationController constructor(context: Context){

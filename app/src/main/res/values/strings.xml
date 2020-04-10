@@ -3,6 +3,5 @@
 
     <!-- service -->
 
-    <string name="location_notification_channel_id">1001</string>
-    <string name="location_notification_channel_name">Localización cafachiva</string>
+    <string name="needs_permissions">Necesitas los permisos para usar este App</string>
 </resources>
